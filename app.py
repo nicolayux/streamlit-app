@@ -1,62 +1,48 @@
 import streamlit as st
 import pandas as pd
-from genai import generate_text, display_tweet
+from genai import GenAI
 from utils import calculate_engagement, get_engagement_string, compute_keyword_engagement, create_persona_tweet
 
-# Load data (replace 'tweets.csv' with your actual file)
+# Initialize GenAI once
+if 'genai' not in st.session_state:
+    st.session_state.genai = GenAI(openai_api_key=st.secrets["OPENAI_API_KEY"])
+
 @st.cache_data
 def load_data():
-    return pd.read_csv('tweets.csv')
+    return pd.read_csv('TwExportly_aoc_tweets_2025_01_30.csv')
 
-# Main app
 st.title("Twitter Engagement Analyzer")
+page = st.sidebar.radio("Navigation", ["Engagement", "Keywords", "Generate Tweet"])
 
-# Sidebar navigation
-page = st.sidebar.radio("Navigation", ["Engagement Analysis", "Keyword Analysis", "Persona Tweet Generator"])
-
-# Load data
 df = load_data()
+df = calculate_engagement(df)
 
-if page == "Engagement Analysis":
+if page == "Engagement":
     st.header("Engagement Analysis")
+    st.dataframe(df[['text', 'engagement']])
     
-    # Calculate engagement and display data
-    df = calculate_engagement(df)
-    st.dataframe(df[['text', 'favorite_count', 'view_count', 'engagement']])
-    
-    # Generate engagement analysis string using AI
-    if st.button("Analyze Engagement"):
-        analysis_string = get_engagement_string(df, generate_text)
-        st.write("### Engagement Analysis:")
-        st.write(analysis_string)
+    if st.button("Analyze Patterns"):
+        analysis = get_engagement_string(df, st.session_state.genai)
+        st.subheader("Engagement Insights")
+        st.write(analysis)
 
-elif page == "Keyword Analysis":
-    st.header("Keyword Engagement Analysis")
+elif page == "Keywords":
+    st.header("Keyword Impact")
+    keywords = st.text_input("Enter comma-separated keywords:")
     
-    # Input keywords from user
-    keyword_string = st.text_input("Enter keywords (comma-separated):")
-    
-    if st.button("Analyze Keywords"):
-        if keyword_string:
-            df_keywords = compute_keyword_engagement(df, keyword_string)
-            st.write("### Keyword Engagement Results:")
-            st.dataframe(df_keywords)
+    if st.button("Analyze Keywords") and keywords:
+        keywords_df = compute_keyword_engagement(df, keywords)
+        if not keywords_df.empty:
+            st.dataframe(keywords_df.sort_values('pvalue_bh'))
         else:
-            st.warning("Please enter at least one keyword.")
+            st.warning("No valid keywords to analyze")
 
-elif page == "Persona Tweet Generator":
-    st.header("Persona Tweet Generator")
+elif page == "Generate Tweet":
+    st.header("Tweet Generator")
+    topic = st.text_input("Enter tweet topic:")
     
-    # Input topic from user
-    topic = st.text_input("Enter a topic:")
-    
-    if st.button("Generate Tweet"):
-        if topic:
-            # Generate persona tweet using AI
-            engagement_analysis_string = get_engagement_string(df, generate_text)
-            tweet_html = create_persona_tweet(topic, df, engagement_analysis_string, generate_text)
-            
-            # Display generated tweet
-            display_tweet(tweet_html)
-        else:
-            st.warning("Please enter a topic.")
+    if st.button("Generate") and topic:
+        engagement_analysis = get_engagement_string(df, st.session_state.genai)
+        tweet_text = create_persona_tweet(topic, df, engagement_analysis, st.session_state.genai)
+        st.markdown(st.session_state.genai.display_tweet(tweet_text), unsafe_allow_html=True)
+

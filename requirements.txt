@@ -1,9 +1,6 @@
-streamlit
-pandas
-plotly
-python-dotenv
+streamlit==1.29.0
+pandas==2.1.4
 openai==1.66.3
-requests
-beautifulsoup4
-altair
-
+scipy==1.11.4
+statsmodels==0.14.1
+python-dotenv==1.0.0
