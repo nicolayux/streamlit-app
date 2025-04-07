@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cyberpunk Twitter Persona App Assignment</title>
+  <style>
+    body {
+      background-color: #0f0f1a;
+      color: #f8f8ff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 40px;
+    }
+
+    h1, h2, h3 {
+      color: #ff0090;
+      text-shadow: 0 0 10px #ff0090;
+    }
+
+    h1 {
+      font-size: 36px;
+    }
+
+    h2 {
+      font-size: 28px;
+    }
+
+    h3 {
+      font-size: 24px;
+    }
+
+    code {
+      background: #1a1a2e;
+      padding: 2px 6px;
+      border-radius: 5px;
+      color: #00ffe7;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .hint, .submission, .grading {
+      background-color: #1c1c2e;
+      padding: 20px;
+      border-left: 5px solid #00ffe7;
+      border-radius: 8px;
+    }
+
+    ul {
+      padding-left: 25px;
+    }
+    @media print {
+  body {
+    background-color: #0f0f1a !important;
+    color: #f8f8ff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .section, .hint, .submission, .grading {
+    background-color: #1c1c2e !important;
+    color: #ffffff !important;
+    border-color: #00ffe7 !important;
+  }
+
+  h1, h2, h3 {
+    color: #ff0090 !important;
+    text-shadow: none !important;
+  }
+
+  code {
+    background-color: #1a1a2e !important;
+    color: #00ffe7 !important;
+  }
+}
+
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>📘 MGT 575 Homework 6: Build a Twitter Persona App</h1>
+
+
+  <div class="section">
+    <h2>✨ Assignment</h2>
+    <p><em>App maker, app maker, make me an app.</em></p>
+    <p>You are building a Streamlit web app that uses AI to analyze the engagement of a user's tweets and create new ones in the same voice. Your app should:</p>
+    <ul>
+      <li>Analyze which tweets perform best using engagement metrics.</li>
+      <li>Discover what keywords get the most engagement.</li>
+      <li>Clone the user's tweeting style using AI to generate new, engaging tweets on demand.</li>
+    </ul>
+  </div>
+  You should have your app in a file <code>app.py</code> and any helper functions in a file <code>utils.py</code>.  These will be the main files you submit.
+
+  <div class="section">
+    <h2>📃 Starter Code Provided</h2>
+    <p>You will be provided a Python module called <code>genai.py</code> with the following useful <strong>functions already implemented</strong>:</p>
+    <pre><code>generate_text
+display_tweet</code></pre>
+  </div>
+
+  <div class="section">
+    <h2>🌐 App Overview</h2>
+    <p>Your app will have <strong>three pages</strong>:</p>
+
+    <h3>🔹 1) Homepage</h3>
+    <ul>
+      <li>Upload a CSV of tweets </li>
+      <li>Compute <code>engagement = favorite_count / view_count</code> of the tweets
+      <li> Apply a function <code>get_engagement_string(df)</code> that uses AI to compute a string analyzing what about the tweets gets engagement.  Your instructions or prompt to the AI should include the text and engagement of the tweets. The function should give you a string with the engagment analysis.</li>
+      <li>While computing the engagement analysis, show a spinner with <strong>"Analyzing engagement ..."</strong> since this is a slow computation.</li>
+      <li>Display a ranked table of tweets sorted by engagement with title: <strong>Top Tweets</strong> and columns Tweet, Engagement.</li>
+      <li>Below the table, show the engagement summary string in styled text that is easy to read.</li>
+    </ul>
+
+    <h3>🔹 2) Keyword Engagement</h3>
+    <ul>
+      <li>Input box titled <strong>"Keywords"</strong> (comma-separated keywords).  Make sure you have instructions telling the user they can input multiple keywords if they are separated by a comma. Call this string of comma separted keywords <code>keywords_string</code>.  There is a button called <strong>Analyze</strong> below this input box.
+      <li>Clicking <strong>Analyze</strong> will call <code>compute_keyword_engagement(df,keyword_string)</code> which should return a dataframe <code>df_keywords</code> which has columns <code>keyword, pvalue_bh, engagement_false, engagement_true</code>.  This function should compute the mean engagement for the tweets with and without the keyword, and then do a t-test and get the <code>pvalue</code>. Then it should apply the Benjamini-Hochberg correction to get the corrected <code>pvalue_bh</code>.
+      <li>Generate a bar plot using <code>df_keywords</code>:</li>
+      <ul>
+        <li>X-axis: keyword</li>
+        <li>Y-axis: engagement</li>
+        <li>Hue: has keyword true vs false</li>
+        <li>BH corrected p-value displayed above "true" bar of each keyword</li>
+        <li>Title: <strong>Keyword Engagement</strong></li>
+      </ul>
+      
+    </ul>
+
+    <h3>🔹 3) Persona Tweet</h3>
+    <ul>
+      <li>Input box at top labeled <strong>"Topic"</strong> (text or URL)</li>
+      <li>Below, a button labeled <strong>"Create tweet"</strong></li>
+      <li>On click, spinner shows <strong>"Creating tweet..."</strong> and calls a function <code>create_persona_tweet(topic, df, engagement_analysis_string)</code> that returns an HTML string <code>tweet_html</code> that is the AI tweet formatted to look like a tweet.  Your function should take the tweet text and engagement columns of <code>df</code>, along with the <code>engagement_analysis_string</code> in the AI instructions, the <code>topic</code> (or the text of the webpage if <code>topic</code> is a URL) in the AI prompt.  The function should return the HTML of the formatted AI tweet so it looks like a real tweet.  The function <code>display_tweet</code> in the GenAI class will be useful here.</li>
+      <li>Display tweet HTML from <code>create_persona_tweet</code> using markdown (this will make sure it renders properly)</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>🎈 Style Guide</h2>
+    <ul>
+      <li><strong>Theme</strong>: Cyberpunk</li>
+      <li>Dark mode, neon accents </li>
+      <li>Use custom fonts, glowing text effects, and modern UI styling</li>
+      <li>Give your app a cool, futuristic title </li>
+    </ul>
+  </div>
+
+  <div class="section submission">
+    <h2>📤 Submission</h2>
+    <ul>
+      <li>Submit a ZIP file with:</li>
+      <ul>
+        <li>Your <code>app.py</code></li>
+        <li>Your <code>utils.py</code></li>
+        <li>Your <code>genai.py</code> (provided, don’t modify)</li>
+        <li>Any sample CSV with tweets used</li>
+      </ul>
+    </ul>
+  </div>
+
+  <div class="section grading">
+    <h2>🎯 Grading (100 pts)</h2>
+    <ul>
+      <li>Correct functions in <code>utils.py</code> – 30 pts</li>
+      <li>Homeage – 15 pts</li>
+      <li>Keyword engagement page – 15 pts</li>
+      <li>Persona tweet generation – 15 pts</li>
+      <li>Cyberpunk style – 20 pts</li>
+      <li> Submitted files <code>app.py, utils.py, genai.py</code> and a CSV with tweets - 5 points</li>
+    </ul>
+  </div>
+</body>
+</html>
